@@ -48,7 +48,7 @@
 
                             <ul class="dropdown-menu dropdown-menu-end">
 
-                                <li v-if="name === 'Administrator'">
+                                <li v-if="name === 'ADM'">
                                     <a class="dropdown-item" href="#" @click.prevent="openUserModal">
                                         <font-awesome-icon icon="users" class="me-2" />
                                         Incluir usuário
@@ -316,8 +316,7 @@
                             </div>
 
                             <div class="col-12 col-lg-4">
-                                <button type="submit" class="btn btn-danger px-4 upload-button" 
-                                :disabled="loading.tax">
+                                <button type="submit" class="btn btn-danger px-4 upload-button" :disabled="loading.tax">
                                     <span v-if="loading.tax" class="spinner-border spinner-border-sm me-2"></span>
 
                                     <font-awesome-icon v-else icon="upload" class="me-2" />
@@ -368,6 +367,143 @@
             </div>
 
         </div>
+        <!-- MODAL DE GESTÃO DE USUÁRIOS -->
+        <template v-if="showUserModal && type === 'ADM'">
+
+            <!-- Fundo do modal -->
+            <div class="modal-backdrop fade show"></div>
+
+            <!-- Janela do modal -->
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true"
+                aria-labelledby="userModalTitle" @click.self="closeUserModal" @keydown.esc.stop="closeUserModal">
+                <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+
+                        <div class="modal-header bg-red">
+                            <h5 id="userModalTitle" class="modal-title">
+                                Gestão de usuários
+                            </h5>
+
+                            <button type="button" class="btn-close" aria-label="Fechar"
+                                @click="closeUserModal"></button>
+                        </div>
+
+                        <div class="modal-body">
+
+                            <!-- Navegação entre listagem e cadastro -->
+                            <div class="nav nav-tabs mb-3">
+                                <button type="button" class="nav-link" :class="{ active: activeTab === 'list' }"
+                                    @click="activeTab = 'list'">
+                                    Usuários cadastrados
+                                </button>
+
+                                <button type="button" class="nav-link" :class="{ active: activeTab === 'create' }"
+                                    @click="activeTab = 'create'">
+                                    Incluir usuário
+                                </button>
+                            </div>
+
+                            <!-- LISTAGEM -->
+                            <div v-if="activeTab === 'list'">
+
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Nome</th>
+                                                <th scope="col">E-mail</th>
+                                                <th scope="col">Perfil</th>
+                                                <th scope="col" class="text-end">
+                                                    Ações
+                                                </th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr v-for="user in users" :key="user.id">
+                                                <td>{{ user.name }}</td>
+                                                <td>{{ user.email }}</td>
+                                                <td>
+                                                    {{
+                                                        user.type === 'ADM'
+                                                            ? 'Administrador'
+                                                            : 'Usuário'
+                                                    }}
+                                                </td>
+                                                <td class="text-end">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                                        @click="deleteUser(user.id)">
+                                                        Excluir
+                                                    </button>
+                                                </td>
+                                            </tr>
+
+                                            <tr v-if="!users.length">
+                                                <td colspan="4" class="text-center text-muted py-4">
+                                                    Nenhum usuário para exibir.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+                            <!-- CADASTRO -->
+                            <form v-else-if="activeTab === 'create'" @submit.prevent="createUser">
+                                <div class="mb-3 col-12">
+                                    <label for="newUserName" class="form-label">
+                                        Nome
+                                    </label>
+
+                                    <input id="newUserName" v-model.trim="newUser.name" type="text" class="form-control"
+                                        autocomplete="name" required />
+                                </div>
+
+                                <div class="mb-3 col-12">
+                                    <label for="newUserEmail" class="form-label">
+                                        E-mail
+                                    </label>
+
+                                    <input id="newUserEmail" v-model.trim="newUser.email" type="email"
+                                        class="form-control" autocomplete="email" required />
+                                </div>
+
+                                <div class="mb-3 col-6">
+                                    <label for="newUserType" class="form-label">
+                                        Perfil
+                                    </label>
+
+                                    <select id="newUserType" v-model="newUser.type" class="form-control" required>
+                                        <option value="USR">Usuário</option>
+                                        <option value="ADM">Administrador</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-secondary" @click="activeTab = 'list'">
+                                        Voltar
+                                    </button>
+
+                                    <button type="submit" class="btn btn-danger ml-3">
+                                        Cadastrar usuário
+                                    </button>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @click="closeUserModal">
+                                Fechar
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </template>
 
     </div>
 </template>
@@ -385,6 +521,17 @@
     transition: 0.2s;
 }
 
+.bg-red {
+  background-color: #DF0209;
+  color:#ffffff;
+} 
+
+.modal-title {
+
+    color:#ffffff
+
+}
+ 
 .block-link-shadow:hover {
     box-shadow: 0 8px 20px rgba(0, 0, 0, .15);
     transform: translateY(-2px);
